@@ -13,14 +13,20 @@
       <version>${dropwizard.version}</version>
     </dependency>
     <dependency>
-      <groupId>org.glassfish.jersey.media</groupId>
-      <artifactId>jersey-media-multipart</artifactId>
-      <version>2.17</version>
-    </dependency>
-    <dependency>
       <groupId>io.dropwizard</groupId>
       <artifactId>dropwizard-assets</artifactId>
       <version>${dropwizard.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>io.dropwizard</groupId>
+      <artifactId>dropwizard-forms</artifactId>
+      <version>${dropwizard.version}</version>
+      <type>pom</type>
+    </dependency>
+    <dependency>
+      <groupId>io.dropwizard</groupId>
+      <artifactId>dropwizard-jersey</artifactId>
+      <version>0.8.1</version>
     </dependency>
   </dependencies>
 

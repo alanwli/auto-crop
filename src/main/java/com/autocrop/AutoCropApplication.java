@@ -5,6 +5,8 @@ import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.setup.Environment;
 import io.dropwizard.assets.AssetsBundle;
 
+import org.glassfish.jersey.media.multipart.MultiPartFeature;
+
 public class AutoCropApplication extends Application<AutoCropConfiguration> {
   public static void main(String[] args) throws Exception {
     new AutoCropApplication().run(args);
@@ -24,5 +26,6 @@ public class AutoCropApplication extends Application<AutoCropConfiguration> {
   public void run(AutoCropConfiguration configuration, Environment environment) {
     final AutoCropResource resource = new AutoCropResource();
     environment.jersey().register(resource);
+    environment.jersey().register(MultiPartFeature.class);
   }
 }
