@@ -1,8 +1,19 @@
 <html>
 <body>
-	<form action="api/auto-crop/upload" method="post" enctype="multipart/form-data">
-		<p>Select a file: <input type="file" name="file" size="45"/></p>
-		<input type="submit" value="upload"/>
-	</form>
+  <div id="uploadForm">
+    <form action="api/auto-crop/upload" method="post" enctype="multipart/form-data">
+      <p>Select a file: <input type="file" name="file" size="45"/></p>
+      <input type="submit" value="upload"/>
+    </form>
+  </div>
+
+  <script language="javascript">
+    if (window.File && window.FileReader && window.FileList && window.Blob) {
+      // if browser supports html5 drag-n-drop upload, then don't show upload form
+      document.getElementById("uploadForm").style.visibility="hidden";
+    } else {
+      // TODO
+    }
+  </script>
 </body>
 </html>
