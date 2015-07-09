@@ -30,8 +30,8 @@ public class AutoCropResource {
   @POST
   @Path("/upload")
   @Consumes(MediaType.MULTIPART_FORM_DATA)
-  public Response upload(@FormDataParam("file") InputStream uploadInputStream,
-                         @FormDataParam("file") FormDataContentDisposition fileDetail) throws IOException {
+  public Response upload(@FormDataParam("fileselect") InputStream uploadInputStream,
+                         @FormDataParam("fileselect") FormDataContentDisposition fileDetail) throws IOException {
     java.nio.file.Path outputPath = FileSystems.getDefault().getPath("/tmp", "blah.jpg");
     Files.copy(uploadInputStream, outputPath);
 
