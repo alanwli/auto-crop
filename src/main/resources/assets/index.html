@@ -6,11 +6,11 @@
       display: none;
       font-weight: bold;
       text-align: center;
-      padding: 1em 0;
-      margin: 1em 0;
+      padding: 2em 0;
+      margin: 2em 0;
       color: #555;
-      border: 2px dashed #555;
-      border-radius: 7px;
+      border: 3px dashed #555;
+      border-radius: 20px;
       cursor: default;
     }
 
@@ -28,10 +28,10 @@
     <form id="uploadForm" action="api/auto-crop/upload" method="post" enctype="multipart/form-data">
       <div>
         <input type="file" id="fileselect" name="fileselect" accept="image/jpeg"/>
-        <div id="filedrag">or drag scanned file here</div>
+        <div id="filedrag">drag scanned file here to auto crop</div>
       </div>
       <div id="submitbutton">
-        <button type="submit">Upload File</button>
+        <button type="submit">upload file</button>
       </div>
     </form>
   </div>
@@ -43,7 +43,7 @@
       var submitbutton = document.getElementById("submitbutton");
 
       // file select
-      fileselect.addEventListener("change", FileSelectHandler, false);
+      //fileselect.addEventListener("change", FileSelectHandler, false);
 
       var xhr = new XMLHttpRequest();
       if (xhr.upload) {
@@ -55,6 +55,7 @@
 
         // remove submit button
         submitbutton.style.display = "none";
+        fileselect.style.display = "none";
       }
     }
 
