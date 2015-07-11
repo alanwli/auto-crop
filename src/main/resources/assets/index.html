@@ -7,19 +7,34 @@
       font-weight: bold;
       text-align: center;
       padding: 2em 0;
-      margin: 2em 0;
+      margin: auto;
       color: #555;
       border: 3px dashed #555;
       border-radius: 20px;
       cursor: default;
+      height: 25%;
+      width: 50%;
     }
 
     #filedrag.hover
     {
-      color: #f00;
-      border-color: #f00;
-      border-style: solid;
+      color: #0080ff;
+      border-color: #0080ff;
+      border-style: 3px dashed #0080ff;
       box-shadow: inset 0 3px 4px #888;
+    }
+
+    .progress_outer {
+      display: none;
+      margin: auto;
+      border: 1px solid #000;
+      width: 50%;
+    }
+
+    .progress {
+        width: 0%;
+        background: url("img/progressbar.gif");
+        height: 20px;
     }
   </style>
 </head>
@@ -28,12 +43,15 @@
     <form id="uploadForm" action="api/auto-crop/upload" method="post" enctype="multipart/form-data">
       <div>
         <input type="file" id="fileselect" name="fileselect" accept="image/jpeg"/>
-        <div id="filedrag">drag scanned file here to auto crop</div>
+        <div id="filedrag">drag scanned image file here to auto crop</div>
       </div>
       <div id="submitbutton">
         <button type="submit">upload file</button>
       </div>
     </form>
+    <div id='_progress_outer' class='progress_outer'>
+      <div id='_progress' class='progress'></div>
+    </div>
   </div>
 
   <script language="javascript">
@@ -41,6 +59,8 @@
       var fileselect = document.getElementById("fileselect");
       var filedrag = document.getElementById("filedrag");
       var submitbutton = document.getElementById("submitbutton");
+      var progress = document.getElementById("_progress");
+      var progress_outer = document.getElementById("_progress_outer");
 
       // file select
       //fileselect.addEventListener("change", FileSelectHandler, false);
@@ -78,12 +98,17 @@
     }
 
     function upload(file) {
+      progress_outer.style.display = "block";
+      progress.style.width = '0%';
       var formData = new FormData();
       formData.append("fileselect", file);
       var xhr = new XMLHttpRequest();
+      xhr.upload.addEventListener('progress', function(e){
+        progress.style.width = (Math.ceil(e.loaded/e.total) * 100 * 0.75) + '%';
+      }, false);
       //if (xhr.upload && file.type == "image/jpeg") {
-      xhr.open("POST", document.getElementById("uploadForm").action, true);
-      xhr.send(formData);
+        xhr.open("POST", document.getElementById("uploadForm").action, true);
+        xhr.send(formData);
       //}
     }
   </script>
