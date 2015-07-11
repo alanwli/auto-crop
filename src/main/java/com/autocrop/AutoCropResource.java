@@ -7,6 +7,7 @@ import java.io.InputStream;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.FileSystems;
+import java.util.UUID;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
@@ -30,11 +31,15 @@ public class AutoCropResource {
   @POST
   @Path("/upload")
   @Consumes(MediaType.MULTIPART_FORM_DATA)
+  @Produces(MediaType.TEXT_PLAIN)
   public Response upload(@FormDataParam("fileselect") InputStream uploadInputStream,
                          @FormDataParam("fileselect") FormDataContentDisposition fileDetail) throws IOException {
-    java.nio.file.Path outputPath = FileSystems.getDefault().getPath("/tmp", "blah.jpg");
+    UUID uuid = UUID.randomUUID();
+    String pathStr = String.format("/tmp/auto-crop/%s", uuid.toString().replaceAll("-", ""));
+    Files.createDirectory(FileSystems.getDefault().getPath(pathStr));
+    java.nio.file.Path outputPath = FileSystems.getDefault().getPath(pathStr, fileDetail.getFileName());
     Files.copy(uploadInputStream, outputPath);
 
-    return Response.ok().build();
+    return Response.ok(uuid.toString()).build();
   }
 }
