@@ -42,11 +42,8 @@
   <div>
     <form id="uploadForm" action="api/auto-crop/upload" method="post" enctype="multipart/form-data">
       <div>
-        <input type="file" id="fileselect" name="fileselect" accept="image/jpeg"/>
-        <div id="filedrag">drag scanned image file here to auto crop</div>
-      </div>
-      <div id="submitbutton">
-        <button type="submit">upload file</button>
+        <input type="file" id="fileselect" name="fileselect" accept="image/jpeg,image/png"/>
+        <div id="filedrag">drag scanned image (jpeg or png) file here to auto crop</div>
       </div>
     </form>
     <div id='_progress_outer' class='progress_outer'>
@@ -58,7 +55,6 @@
     if (window.File && window.FileReader && window.FileList && window.Blob) {
       var fileselect = document.getElementById("fileselect");
       var filedrag = document.getElementById("filedrag");
-      var submitbutton = document.getElementById("submitbutton");
       var progress = document.getElementById("_progress");
       var progress_outer = document.getElementById("_progress_outer");
 
@@ -74,7 +70,6 @@
         filedrag.style.display = "block";
 
         // remove submit button
-        submitbutton.style.display = "none";
         fileselect.style.display = "none";
       }
     }
@@ -106,10 +101,10 @@
       xhr.upload.addEventListener('progress', function(e){
         progress.style.width = (Math.ceil(e.loaded/e.total) * 100 * 0.75) + '%';
       }, false);
-      //if (xhr.upload && file.type == "image/jpeg") {
+      if (xhr.upload && (file.type == "image/jpeg" || file.type == "image/png")) {
         xhr.open("POST", document.getElementById("uploadForm").action, true);
         xhr.send(formData);
-      //}
+      }
     }
   </script>
 </body>
