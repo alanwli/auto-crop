@@ -32,9 +32,9 @@
     }
 
     .progress {
-        width: 0%;
-        background: url("img/progressbar.gif");
-        height: 20px;
+      width: 0%;
+      background: url("img/progressbar.gif");
+      height: 20px;
     }
   </style>
 </head>
@@ -58,20 +58,14 @@
       var progress = document.getElementById("_progress");
       var progress_outer = document.getElementById("_progress_outer");
 
-      // file select
-      //fileselect.addEventListener("change", FileSelectHandler, false);
+      // file drop
+      filedrag.addEventListener("dragover", FileDragHover, false);
+      filedrag.addEventListener("dragleave", FileDragHover, false);
+      filedrag.addEventListener("drop", FileSelectHandler, false);
+      filedrag.style.display = "block";
 
-      var xhr = new XMLHttpRequest();
-      if (xhr.upload) {
-        // file drop
-        filedrag.addEventListener("dragover", FileDragHover, false);
-        filedrag.addEventListener("dragleave", FileDragHover, false);
-        filedrag.addEventListener("drop", FileSelectHandler, false);
-        filedrag.style.display = "block";
-
-        // remove submit button
-        fileselect.style.display = "none";
-      }
+      // remove submit button
+      fileselect.style.display = "none";
     }
 
     // file drag hover
@@ -97,11 +91,22 @@
       progress.style.width = '0%';
       var formData = new FormData();
       formData.append("fileselect", file);
+
       var xhr = new XMLHttpRequest();
-      xhr.upload.addEventListener('progress', function(e){
+
+      // this handler will update the progress meter
+      xhr.upload.addEventListener('progress', function(e) {
         progress.style.width = (Math.ceil(e.loaded/e.total) * 100 * 0.75) + '%';
       }, false);
-      if (xhr.upload && (file.type == "image/jpeg" || file.type == "image/png")) {
+      // when upload is done, then change the status to cropping
+      xhr.upload.addEventListener('load', function(e) {
+        progress.innerHTML = 'cropping...';
+        // TODO other stuff
+      }, false);
+
+      // TODO add handlers for error handling
+      if (file.type == "image/jpeg" || file.type == "image/png") {
+        progress.innerHTML = 'uploading...';
         xhr.open("POST", document.getElementById("uploadForm").action, true);
         xhr.send(formData);
       }

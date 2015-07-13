@@ -42,7 +42,6 @@ public class AutoCropResource {
   @POST
   @Path("/upload")
   @Consumes(MediaType.MULTIPART_FORM_DATA)
-  @Produces(MediaType.TEXT_PLAIN)
   public Response upload(@FormDataParam("fileselect") InputStream uploadInputStream,
                          @FormDataParam("fileselect") FormDataContentDisposition fileDetail) throws IOException {
     UUID uuid = UUID.randomUUID();
@@ -51,6 +50,6 @@ public class AutoCropResource {
     java.nio.file.Path outputPath = FileSystems.getDefault().getPath(pathStr, fileDetail.getFileName());
     Files.copy(uploadInputStream, outputPath);
 
-    return Response.ok(uuid.toString()).build();
+    return Response.ok(uuid.toString(), MediaType.TEXT_PLAIN).build();
   }
 }
