@@ -47,7 +47,7 @@ public class AutoCropResource {
     UUID uuid = UUID.randomUUID();
     String pathStr = String.format("/tmp/auto-crop/%s", uuid.toString().replaceAll("-", ""));
     Files.createDirectory(FileSystems.getDefault().getPath(pathStr));
-    java.nio.file.Path outputPath = FileSystems.getDefault().getPath(pathStr, fileDetail.getFileName());
+    java.nio.file.Path outputPath = FileSystems.getDefault().getPath(pathStr, "upload");
     Files.copy(uploadInputStream, outputPath);
 
     return Response.ok(uuid.toString(), MediaType.TEXT_PLAIN).build();
