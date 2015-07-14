@@ -1,149 +1,4 @@
 #!/bin/bash
-#
-# Revised by Fred Weinhaus ...................... revised 4/30/2015
-# Revised by Anthony Thyssen to add -b option ... revised 8/24/2010
-# Developed by Fred Weinhaus 1/30/2010 .......... revised 4/25/2015
-#
-# ------------------------------------------------------------------------------
-# 
-# Licensing:
-# 
-# Copyright © Fred Weinhaus
-# 
-# My scripts are available free of charge for non-commercial use, ONLY.
-# 
-# For use of my scripts in commercial (for-profit) environments or 
-# non-free applications, please contact me (Fred Weinhaus) for 
-# licensing arrangements. My email address is fmw at alink dot net.
-# 
-# If you: 1) redistribute, 2) incorporate any of these scripts into other 
-# free applications or 3) reprogram them in another scripting language, 
-# then you must contact me for permission, especially if the result might 
-# be used in a commercial or for-profit environment.
-# 
-# My scripts are also subject, in a subordinate manner, to the ImageMagick 
-# license, which can be found at: http://www.imagemagick.org/script/license.php
-# 
-# ------------------------------------------------------------------------------
-# 
-####
-#
-# USAGE: multicrop [-c coords] [-b bcolor] [-f fuzzval] [-g grid] [-d discard] 
-# [-p prune] [-u unrotate] [-m mask] infile outfile
-# USAGE: multicrop [-h or -help]
-# 
-# OPTIONS:
-# 
-# -c          coords         pixel coordinate to extract background color; 
-#                            may be expressed as gravity value (NorthWest, etc)
-#                            or as "x,y" value; default is NorthWest=(0,0)
-# -b          bcolor         background color to use instead of option -c;
-#                            any valid IM color; default is to use option -c
-# -f          fuzzval        fuzz value for separating background color;
-#                            expressed as (integer) percent 0 to 100; 
-#                            default=0 (uniform color)
-# -g          grid           grid spacing in both x and y as percent of 
-#                            image width and height; used to locate images;
-#                            integer>0; default=10;
-# -d          discard        discard any region that has a width or height 
-#                            smaller than this size; integer>0; default is to
-#                            keep all regions
-# -p          prune          prune noisy regions in the mask image using a 
-#                            morphology disk shape of the specified size; 
-#                            integer>1; default is no pruning   
-# -u          unrotate       unrotate method; choices are 1 for -deskew, 
-#                            2 for unrotate script and 3 for no unrotate;
-#                            default=1
-# -m          mask           mask presentation method; choices are view, 
-#                            save (to file) or output mask only; default 
-#                            is none of the above, just output the images
-# 
-###
-# 
-# NAME: MULTICROP
-# 
-# PURPOSE: To crop and unrotate multiple images from a scanned image.
-# 
-# DESCRIPTION: MULTICROP crops and unrotates multiple images from a scanned image.
-# The images must be well separated so that background color shows between them. 
-# The process uses a floodfill technique based upon a seed coordinate and a fuzz 
-# value to separate the individual images from the background of the scan. 
-# The correct choice of fuzz factor is very important. If too small, the images 
-# will not be separate. If too large, parts of the outer area of the image 
-# containing similar colors will be lost and the image may be separated into 
-# multiple parts. There are two unrotate methods. The first uses the IM deskew 
-# function, but is limited to 5 degrees of rotate or less. The second uses my 
-# unrotate script. It allows much larger rotations, but will be slower. If 
-# using the second method, my unrotate script must be downloaded and installed.
-# 
-# IMPORTANT: The images in the scanned file must be well separated in x and y
-# so that their bounding boxes do not overlap. This is especially important 
-# if the images have a significant rotation.
-# 
-# The output images will be named from the specified outfile and -000, -001, 
-# -002 etc, will be appended before the .suffix.
-# 
-# Arguments: 
-# 
-# -c coords ... COORDS is any location within the background (non-image) area 
-# for the algorithm to find the background color. It may be specified in terms  
-# of gravity parameters (NorthWest, North, NorthEast, East, SouthEast, South, 
-# SouthWest or West) or as a pixel coordinate "x,y". The default is the 
-# upper left corner = NorthWest = "0,0".
-# 
-# -b bcolor ... BCOLOR is the background color to use for flood fill instead 
-# of extracting this color from the image. This is useful when an image has 
-# no borders with sub-images hard against the edges. Any valid IM color is 
-# allowed. The default is to use option -c.
-# 
-# -f fuzzval ... FUZZVAL is the fuzz amount specified as an integer percent
-# value between 0 to 100 (without the % sign). The correct choice of fuzz
-# factor is very important. If too small, the images will not be separate.
-# If too larger, parts of the outer area of the image containing similar
-# colors will be lost and the image may be separated into multiple parts.
-# Typical values are probably between 5 and 20 percent. The default=10
-# 
-# -g grid ... GRID is the grid spacing for testing points in the input image 
-# to see if they are background or image. The grid value is specified as an 
-# integer percent greater than 0 and less than 100 of the width and height 
-# of the input image. The default=10.
-# 
-# -d discard ... DISCARD any region that has a width or height smaller than 
-# the specified discard size. Values are integer>0. The default is to keep 
-# all regions.
-# 
-# -p prune ... PRUNE (remove) noisy regions in the mask image using a 
-# morphologic disk shape operations of the specified prune size. Values are 
-# integer>1 (which will later be divided by 2). The default is no pruning.  
-# 
-# -u unrotate ... UNROTATE is the unrotation method. Choices are: 1, 2 or 3.
-# The default is unrotate=1, which is fast and uses the IM -deskew function, 
-# but is limited to images that are rotated no more than 5 degrees in the scan. 
-# Option unrotate=2 uses my unrotate script. It can handle larger rotations, 
-# but is slower. If using the latter method, my unrotate script must be 
-# downloaded and also installed so that it is available for this script to use.
-# Option unrotate=3 makes no attempt to unrotate the images.
-# 
-# -m mask ... MASK provides several options for reviewing the initial mask that 
-# is generated by the fuzz value. The choices are: view (display to X11 window),
-# save (to disk) along with the images, or output (without processing the images).
-# The default is to simply process the images without showing or saving the mask.
-# If using the view mode, then processing will stop until the image is closed. 
-# But this allows you to then kill the script if the mask is not appropriate. 
-# A good approach is to use the output mode repeatedly with various fuzzvals 
-# until a reasonable mask is created. Note that the mask must separate the 
-# images, but the background can "eat" a little into the images so long as no 
-# full edge is lost or the images is split into multiple parts.
-# 
-# NOTE: If using unrotate method 2, then my script, unrotate, is required 
-# as well.
-# 
-# CAVEAT: No guarantee that this script will work on all platforms, 
-# nor that trapping of inconsistent parameters is complete and 
-# foolproof. Use At Your Own Risk. 
-# 
-######
-#
 
 # set default values 
 coords=""			# initial coord for finding background color
@@ -165,24 +20,24 @@ PROGDIR=`dirname $PROGNAME`            # extract directory of program
 PROGNAME=`basename $PROGNAME`          # base name of program
 usage1() 
 	{
-	echo >&2 ""
-	echo >&2 "$PROGNAME:" "$@"
+	#echo >&2 ""
+	#echo >&2 "$PROGNAME:" "$@"
 	sed >&2 -e '1,/^####/d;  /^###/g;  /^#/!q;  s/^#//;  s/^ //;  4,$p' "$PROGDIR/$PROGNAME"
 	}
 usage2() 
 	{
-	echo >&2 ""
-	echo >&2 "$PROGNAME:" "$@"
+	#echo >&2 ""
+	#echo >&2 "$PROGNAME:" "$@"
 	sed >&2 -e '1,/^####/d;  /^######/g;  /^#/!q;  s/^#*//;  s/^ //;  4,$p' "$PROGDIR/$PROGNAME"
 	}
 
 # function to report error messages
 errMsg()
 	{
-	echo ""
-	echo $1
-	echo ""
-	usage1
+	#echo ""
+	#echo $1
+	#echo ""
+	#usage1
 	exit 1
 	}
 
@@ -197,7 +52,7 @@ checkMinus()
 if [ $# -eq 0 ]
 	then
 	# help information
-	echo ""
+	#echo ""
 	usage2
 	exit 0
 elif [ $# -gt 18 ]
@@ -209,7 +64,7 @@ else
 		# get parameters
 		case "$1" in
 	  -h|-help)    # help information
-				   echo ""
+				   #echo ""
 				   usage2
 				   ;;
 			-f)    # fuzzval
@@ -331,6 +186,13 @@ trap "rm -f $tmpA1 $tmpB1 $tmpA2 $tmpB2 $tmpA3 $tmpB3 $tmpA4 $tmpB4 $tmpA5 $tmpB
 trap "rm -f $tmpA1 $tmpB1 $tmpA2 $tmpB2 $tmpA3 $tmpB3 $tmpA4 $tmpB4 $tmpA5 $tmpB5; exit 1" 1 2 3 15
 trap "rm -f $tmpA1 $tmpB1 $tmpA2 $tmpB2 $tmpA3 $tmpB3 $tmpA4 $tmpB4 $tmpA5 $tmpB5; exit 1" ERR
 
+mime_type=`file --mime-type -b $infile`
+
+if [ $mime_type != "image/jpeg" -a $mime_type != "image/png" ]; then
+  echo "uploaded file is not a jpeg or png file"
+  exit 1
+fi
+
 # read the input image into the temp files and test validity.
 convert -quiet "$infile" +repage "$tmpA1" ||
 	errMsg "--- FILE $infile1 DOES NOT EXIST OR IS NOT AN ORDINARY FILE, NOT READABLE OR HAS ZERO SIZE  ---"
@@ -426,7 +288,7 @@ elif [ $unrotate -eq 3 ]; then
 fi
 
 
-echo ""
+#echo ""
 # loop over grid and floodfill and trim to get individual mask for each image
 k=0
 y=0
@@ -442,11 +304,8 @@ for ((j=0;j<=$num;j++))
 		testcolorval=`convert $tmpA2 -channel rgba -alpha on -format \
 			"%[pixel:u.p{$x,$y}]" info:` 
 		testcolor=`convert xc: -format  "%[fx:$testcolorval=="none"?0:1]" info:` 
-		if $debug; then
-			echo "$x $y $testcolor $testcolorval"
-		fi
 		if [ $testcolor -eq 1 ]; then
-			echo "Processing Image $k"
+			#echo "Processing Image $k"
 			# Take red and none mask.
 			# Floodfill the local red region with white.
 			convert $tmpA2 -channel rgba -alpha on -fill "white" \
@@ -467,9 +326,9 @@ for ((j=0;j<=$num;j++))
 			wd=`identify -ping -format "%w" $tmpA5`
 			ht=`identify -ping -format "%h" $tmpA5`
 			pg=`identify -ping -format "%g" $tmpA5`
-			echo "Size: ${wd}x${ht}"  
-			echo "Page Geometry: $pg"
-			echo ""
+			#echo "Size: ${wd}x${ht}"  
+			#echo "Page Geometry: $pg"
+			#echo ""
 			# Composite the black and white mask onto the original scan.
 			# Then trim and deskew/unrotate to make the output.
 			if [ $unrotate -eq 1 -o $unrotate -eq 3 ]; then
@@ -489,14 +348,14 @@ for ((j=0;j<=$num;j++))
 				k=$(($k + 1))
 			elif [ $wd -lt $discard -o $ht -lt $discard ]; then 
 				rm -f ${outname}-${kk}.${suffix}
-				echo "Discarding Image $k"
+				#echo "Discarding Image $k"
 			else
 				k=$(($k + 1))
 			fi
 		fi
 	done
 done
-echo ""
+echo "$k"
 exit 0
 
 
