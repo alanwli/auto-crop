@@ -188,7 +188,7 @@ trap "rm -f $tmpA1 $tmpB1 $tmpA2 $tmpB2 $tmpA3 $tmpB3 $tmpA4 $tmpB4 $tmpA5 $tmpB
 
 mime_type=`file --mime-type -b $infile`
 
-if [ $mime_type != "image/jpeg" -a $mime_type != "image/png" ]; then
+if [ "$mime_type" != "image/jpeg" -a "$mime_type" != "image/png" ]; then
   echo "uploaded file is not a jpeg or png file"
   exit 1
 fi
@@ -335,11 +335,11 @@ for ((j=0;j<=$num;j++))
 				convert $tmpA1 $tmpA4 -compose multiply -composite \
 					-fuzz ${fuzzval}% -trim -background "$bcolor" $derotate \
 					-compose over -bordercolor "$bcolor" -border 2 -trim +repage \
-					${outname}-${kk}.${suffix}
+					${kk}.${suffix}
 			elif [ $unrotate -eq 2 ]; then
 				convert $tmpA1 $tmpA4 -compose multiply -composite \
 					-fuzz ${fuzzval}% -trim miff:- | \
-				unrotate -f ${fuzzval}% - "${outname}-${kk}.${suffix}"
+				unrotate -f ${fuzzval}% - "${kk}.${suffix}"
 			fi
 			# Fill the selected photo area in the red/none mask with none 
 			# for use with next coordinate so that it does not find it again.
@@ -347,7 +347,7 @@ for ((j=0;j<=$num;j++))
 			if [ "$discard" = "" ]; then
 				k=$(($k + 1))
 			elif [ $wd -lt $discard -o $ht -lt $discard ]; then 
-				rm -f ${outname}-${kk}.${suffix}
+				rm -f ${kk}.${suffix}
 				#echo "Discarding Image $k"
 			else
 				k=$(($k + 1))

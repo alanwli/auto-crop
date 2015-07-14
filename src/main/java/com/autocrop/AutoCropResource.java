@@ -1,7 +1,9 @@
 package com.autocrop;
 
+import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
@@ -14,6 +16,7 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.StreamingOutput;
 
 import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
@@ -24,8 +27,6 @@ public class AutoCropResource {
 
   @GET
   @Path("/fetch")
-  //@Produces({"application/octet-stream"})
-  //@Produces(MediaType.TEXT_PLAIN)
   @Produces({"image/jpeg"})
   public Response streamingFetch() {
     StreamingOutput streamOutput = new StreamingOutput() {
@@ -42,14 +43,43 @@ public class AutoCropResource {
   @POST
   @Path("/upload")
   @Consumes(MediaType.MULTIPART_FORM_DATA)
+  @Produces(MediaType.APPLICATION_JSON)
   public Response upload(@FormDataParam("fileselect") InputStream uploadInputStream,
                          @FormDataParam("fileselect") FormDataContentDisposition fileDetail) throws IOException {
-    UUID uuid = UUID.randomUUID();
-    String pathStr = String.format("/tmp/auto-crop/%s", uuid.toString().replaceAll("-", ""));
-    Files.createDirectory(FileSystems.getDefault().getPath(pathStr));
-    java.nio.file.Path outputPath = FileSystems.getDefault().getPath(pathStr, "upload");
-    Files.copy(uploadInputStream, outputPath);
+    BufferedReader br = null;
+    try {
+      UUID uuid = UUID.randomUUID();
+      String pathStr = String.format("/tmp/auto-crop/%s", uuid.toString().replaceAll("-", ""));
+      Files.createDirectory(FileSystems.getDefault().getPath(pathStr));
+      String uploadFileName = "upload"; // name that we're storing on disk
+      java.nio.file.Path outputPath = FileSystems.getDefault().getPath(pathStr, uploadFileName);
+      Files.copy(uploadInputStream, outputPath);
 
-    return Response.ok(uuid.toString(), MediaType.TEXT_PLAIN).build();
+      ProcessBuilder pb = new ProcessBuilder("/home/alan/dev/auto-crop/script/auto-crop", "-d", "50", uploadFileName, "blah.jpg");
+      pb.directory(FileSystems.getDefault().getPath(pathStr).toFile());
+      Process process = pb.start();
+      int exitCode = process.waitFor();
+      InputStream is = (exitCode == 0) ? process.getInputStream() : process.getErrorStream();
+      br = new BufferedReader(new InputStreamReader(is));
+      String output = br.readLine();
+      br.close();
+      if (exitCode == 0) {
+        String json = String.format("{\"requestId\": \"%s\", \"count\": %d}", uuid.toString(), Integer.parseInt(output));
+        // TODO add to internal book keeping
+        return Response.ok(json).build();
+      } else {
+        String json = String.format("{\"error\": \"%s\"}", output);
+        return Response.status(Status.BAD_REQUEST).entity(json).build();
+      }
+    } catch (Exception ex) {
+      String json = String.format("{\"error\": \"unexpected error, please try again in a few minutes\"");
+      return Response.status(Status.INTERNAL_SERVER_ERROR).entity(json).build();
+    } finally {
+      if (br != null) {
+        br.close();
+      }
+
+      uploadInputStream.close();
+    }
   }
 }
