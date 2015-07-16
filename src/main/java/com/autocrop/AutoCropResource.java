@@ -13,6 +13,7 @@ import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -26,15 +27,23 @@ import org.glassfish.jersey.media.multipart.FormDataParam;
 public class AutoCropResource {
 
   @GET
-  @Path("/fetch")
+  @Path("/fetch/{id}/{index}")
   @Produces({"image/jpeg"})
-  public Response streamingFetch() {
+  public Response streamingFetch(@PathParam("id") final String id,
+                                 @PathParam("index") final int index) {
     StreamingOutput streamOutput = new StreamingOutput() {
       @Override
       public void write(OutputStream os) throws IOException {
-        // TODO
-        java.nio.file.Path path = FileSystems.getDefault().getPath("/tmp/auto-crop/3b6ceb600f1540e68d2e83c2e1ede55c/0.jpg");
-        Files.copy(path, os);
+        try {
+          // TODO validate the input
+          // TODO check against internal book keeping
+          String jpegFilePath = String.format("/tmp/auto-crop/%s/%03d.jpg", id, index);
+	        java.nio.file.Path path = FileSystems.getDefault().getPath(jpegFilePath);
+	        Files.copy(path, os);
+	        os.flush();
+        } finally {
+          os.close();
+        }
       }
     };
     return Response.ok(streamOutput).build();
