@@ -189,7 +189,7 @@ trap "rm -f $tmpA1 $tmpB1 $tmpA2 $tmpB2 $tmpA3 $tmpB3 $tmpA4 $tmpB4 $tmpA5 $tmpB
 mime_type=`file --mime-type -b $infile`
 
 if [ "$mime_type" != "image/jpeg" -a "$mime_type" != "image/png" ]; then
-  echo "uploaded file is not a jpeg or png file"
+  echo >&2 "uploaded file is not a jpeg or png file"
   exit 1
 fi
 

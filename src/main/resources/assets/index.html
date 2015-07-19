@@ -76,6 +76,9 @@
     }
 
     function FileSelectHandler(e) {
+      progress.style.background = 'url("img/progressbar.gif")';
+      progress.style.width = '0%';
+
       // cancel event and hover styling
       FileDragHover(e);
       // fetch FileList object
@@ -101,7 +104,26 @@
       // when upload is done, then change the status to cropping
       xhr.upload.addEventListener('load', function(e) {
         progress.innerHTML = 'cropping...';
-        // TODO other stuff
+      }, false);
+
+      // TODO other stuff
+      xhr.addEventListener('load', function(e) {
+        progress.style.background = 'none';
+        progress.style.width = '100%';
+        if (xhr.status == 200) {
+          progress.style.backgroundColor = '#66ff66';
+          progress.innerHTML = 'done...';
+        } else {
+          progress.style.backgroundColor = '#ff6666';
+          progress.innerHTML = 'error!!';
+        }
+      }, false);
+
+      xhr.addEventListener('error', function(e) {
+        progress.style.background = 'none';
+        progress.style.width = '100%';
+        progress.style.backgroundColor = '#ff6666';
+        progress.innerHTML = 'error!!';
       }, false);
 
       // TODO add handlers for error handling

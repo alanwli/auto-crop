@@ -65,7 +65,7 @@ public class AutoCropResource {
     Integer numCropped = _liveRequests.getIfPresent(requestId);
     if (numCropped == null || index >= numCropped) {
       try {
-	      Thread.sleep(1000L); // add a sleep to prevent brute-forcing
+	      Thread.sleep(2000L); // add a sleep to prevent brute-forcing
       } catch(InterruptedException ex) {
         // ignore
       }
@@ -119,6 +119,11 @@ public class AutoCropResource {
         _liveRequests.put(requestId, numCropped);
         return Response.ok(json).build();
       } else {
+        try {
+          Thread.sleep(10000L); // sleep if the incoming file is bogus
+        } catch(InterruptedException ex) {
+          // ignore
+        }
         String json = String.format("{\"code\": %d, \"message\": \"%s\"}",
             Status.BAD_REQUEST.getStatusCode(), output);
         return Response.status(Status.BAD_REQUEST).entity(json).build();
