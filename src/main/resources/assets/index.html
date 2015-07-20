@@ -115,7 +115,8 @@
           progress.innerHTML = 'done...';
         } else {
           progress.style.backgroundColor = '#ff6666';
-          progress.innerHTML = 'error!!';
+          var response = JSON.parse(xhr.responseText);
+          progress.innerHTML = response.message;
         }
       }, false);
 
@@ -123,7 +124,8 @@
         progress.style.background = 'none';
         progress.style.width = '100%';
         progress.style.backgroundColor = '#ff6666';
-        progress.innerHTML = 'error!!';
+        var response = JSON.parse(xhr.responseText);
+        progress.innerHTML = response.message;
       }, false);
 
       // TODO add handlers for error handling
