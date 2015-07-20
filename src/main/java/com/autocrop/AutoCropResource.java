@@ -8,6 +8,7 @@ import java.io.OutputStream;
 import java.nio.file.FileSystems;
 import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
+import java.nio.file.LinkOption;
 import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.Collections;
@@ -45,7 +46,7 @@ public class AutoCropResource {
   private final static Logger LOGGER = LoggerFactory.getLogger(AutoCropResource.class);
 
   private final Cache<String, Integer> _liveRequests;
-  private final RemovalListener<String, Integer> _removalListener;
+  private final RequestRemoverListener _removalListener;
 
   AutoCropResource() {
     _removalListener = new RequestRemoverListener();
@@ -95,9 +96,9 @@ public class AutoCropResource {
   public Response upload(@FormDataParam("fileselect") InputStream uploadInputStream,
                          @FormDataParam("fileselect") FormDataContentDisposition fileDetail) throws IOException {
     BufferedReader br = null;
+    UUID uuid = UUID.randomUUID();
+    String requestId = uuid.toString().replaceAll("-", "");
     try {
-      UUID uuid = UUID.randomUUID();
-      String requestId = uuid.toString().replaceAll("-", "");
       String pathStr = getRequestPathStr(requestId);
       Files.createDirectory(FileSystems.getDefault().getPath(pathStr));
       String uploadFileName = "upload"; // name that we're storing on disk
@@ -124,11 +125,15 @@ public class AutoCropResource {
         } catch(InterruptedException ex) {
           // ignore
         }
+        // still want to remove the bad request folder and uploaded file
+        _removalListener.addPendingRemoval(requestId);
         String json = String.format("{\"code\": %d, \"message\": \"%s\"}",
             Status.BAD_REQUEST.getStatusCode(), output);
         return Response.status(Status.BAD_REQUEST).entity(json).build();
       }
     } catch (Exception ex) {
+      // still want to remove the bad request folder and uploaded file
+      _removalListener.addPendingRemoval(requestId);
       String json = String.format("{\"code\": %d, \"message\": \"unexpected error, please try again in a few minutes\"",
           Status.INTERNAL_SERVER_ERROR.getStatusCode());
       return Response.status(Status.INTERNAL_SERVER_ERROR).entity(json).build();
@@ -160,6 +165,10 @@ public class AutoCropResource {
     public void onRemoval(RemovalNotification<String, Integer> notification) {
       _pendingRemovals.add(notification.getKey());
     }
+
+    private void addPendingRemoval(String requestId) {
+      _pendingRemovals.add(requestId);
+    }
   }
 
   private static final class RequestRemover implements Runnable {
@@ -181,9 +190,14 @@ public class AutoCropResource {
       for (int i = 0; i < count; i++) {
         String requestId = _pendingRemovals.remove(0);
         String pathStr = getRequestPathStr(requestId);
+        java.nio.file.Path path = FileSystems.getDefault().getPath(pathStr);
+
+        if (! Files.exists(path, LinkOption.NOFOLLOW_LINKS)) {
+          continue;
+        }
 
         try {
-          removeRecursive(FileSystems.getDefault().getPath(pathStr));
+          removeRecursive(path);
           LOGGER.info(String.format("cleaned up %s", pathStr));
         } catch (IOException ex) {
           // add the notification back to process the next time
