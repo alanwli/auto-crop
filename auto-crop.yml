@@ -1,2 +1,2 @@
 server:
-  rootPath: '/api/*'
+  rootPath: '/auto-crop/*'

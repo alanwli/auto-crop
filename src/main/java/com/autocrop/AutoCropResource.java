@@ -40,7 +40,7 @@ import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.RemovalListener;
 import com.google.common.cache.RemovalNotification;
 
-@Path("/auto-crop")
+@Path("/")
 public class AutoCropResource {
 
   private final static Logger LOGGER = LoggerFactory.getLogger(AutoCropResource.class);
@@ -58,7 +58,24 @@ public class AutoCropResource {
   }
 
   @GET
-  @Path("/fetch/{requestId}/{index}")
+  @Path("/photos/{requestId}")
+  @Produces(MediaType.TEXT_HTML)
+  public PhotosView getPhotos(@PathParam("requestId") final String requestId) {
+    Integer numCropped = _liveRequests.getIfPresent(requestId);
+    if (numCropped == null) {
+      try {
+        Thread.sleep(2000L); // add a sleep to prevent brute-forcing
+      } catch(InterruptedException ex) {
+        // ignore
+      }
+      throw new IllegalStateException();
+    }
+
+    return new PhotosView(requestId, numCropped);
+  }
+
+  @GET
+  @Path("/photos/{requestId}/{index}")
   @Produces({"image/jpeg"})
   public Response streamingFetch(@PathParam("requestId") final String requestId,
                                  @PathParam("index") final int index) {
@@ -115,7 +132,7 @@ public class AutoCropResource {
       br.close();
       if (exitCode == 0) {
         int numCropped = Integer.parseInt(output);
-        String json = String.format("{\"requestId\": \"%s\", \"count\": %d}", requestId, numCropped);
+        String json = String.format("{\"requestId\": \"%s\"}", requestId);
         // add to book keeping
         _liveRequests.put(requestId, numCropped);
         return Response.ok(json).build();
