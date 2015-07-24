@@ -49,6 +49,15 @@ public class AutoCropResource {
   private final RequestRemoverListener _removalListener;
 
   AutoCropResource() {
+    java.nio.file.Path uploadPath = FileSystems.getDefault().getPath("/tmp/auto-crop");
+    if (!uploadPath.toFile().exists()) {
+      try {
+	      Files.createDirectory(uploadPath);
+      } catch (IOException ex) {
+        throw new IllegalStateException(ex);
+      }
+    }
+
     _removalListener = new RequestRemoverListener();
     _liveRequests = CacheBuilder.newBuilder()
         .maximumSize(200)
