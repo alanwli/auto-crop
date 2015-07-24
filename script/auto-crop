@@ -8,7 +8,7 @@ grid=10					# grid spacing in percent image
 discard=""				# discard small regions
 prune=""				# prune out noise in mask
 mask=""					# view, save, output
-unrotate=1				# 1=deskew 2=unrotate
+unrotate=3				# 1=deskew 2=unrotate
 debug="false"
 
 # set directory for temporary files
