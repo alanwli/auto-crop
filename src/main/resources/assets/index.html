@@ -59,13 +59,14 @@
   </div>
 
   <script language="javascript">
-    if (window.File && window.FileReader && window.FileList && window.Blob) {
-      var fileselect = document.getElementById("fileselect");
-      var progress = document.getElementById("_progress");
-      var progress_outer = document.getElementById("_progress_outer");
-
-      fileselect.addEventListener("change", FileSelectHandler, false);
+    var fileselect = document.getElementById("fileselect");
+    var progress = document.getElementById("_progress");
+    var progress_outer = document.getElementById("_progress_outer");
+    fileselect.onclick = function() {
+      this.value = null;
     }
+
+    fileselect.addEventListener("change", FileSelectHandler, false);
 
     function FileSelectHandler(e) {
       progress.style.background = 'url("img/progressbar.gif")';
@@ -99,6 +100,10 @@
         if (xhr.status == 200) {
           progress.style.backgroundColor = '#66ff66';
           progress.innerHTML = 'please wait a few more seconds...';
+          var response = JSON.parse(xhr.responseText);
+          setTimeout(function() {
+            window.location.href = 'auto-crop/photos/' + response.requestId;
+          }, 2000);
         } else {
           progress.style.backgroundColor = '#ff6666';
           var response = JSON.parse(xhr.responseText);
