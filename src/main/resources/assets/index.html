@@ -69,16 +69,23 @@
     fileselect.addEventListener("change", FileSelectHandler, false);
 
     function FileSelectHandler(e) {
-      progress.style.background = 'url("img/progressbar.gif")';
-      progress.style.width = '0%';
+      progress_outer.style.display = "block";
 
       // fetch FileList object
       var files = e.target.files || e.dataTransfer.files;
-      upload(files[0])
+      var file = files[0]
+      if (file.size <= 10485760) {
+        upload(file)
+      } else {
+        progress.style.background = 'none';
+        progress.style.width = '100%';
+        progress.style.backgroundColor = '#ff6666';
+        progress.innerHTML = "cannot upload files >10MB";
+      }
     }
 
     function upload(file) {
-      progress_outer.style.display = "block";
+      progress.style.background = 'url("img/progressbar.gif")';
       progress.style.width = '0%';
       var formData = new FormData();
       formData.append("fileselect", file);
