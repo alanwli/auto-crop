@@ -1,2 +1,5 @@
 server:
   rootPath: '/auto-crop/*'
+  applicationConnectors:
+    - type: http
+      port: 80

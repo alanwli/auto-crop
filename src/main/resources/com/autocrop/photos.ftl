@@ -7,7 +7,7 @@
     <script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
   </head>
 	<body>
-    <div class="container">
+    <div class="container lead">
       <h2>Your autocropped photos</h2>
       <p>Save these images to your computer because they will only remain on the server for a few minutes. Click on the images to see it in full size.</p>
       <#assign numRows=(numPhotos/3)?ceiling>
