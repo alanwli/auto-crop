@@ -1,0 +1,17 @@
+Deployment:
+
+:::PROD:::
+mkdir -p dev/auto-crop/script
+mkdir -p dev/auto-crop/target
+
+sudo apt-add-repository ppa:webupd8team/java
+sudo apt-get update
+sudo apt-get install oracle-java8-installer
+sudo apt-get install imagemagick
+sudo apt-get install screen
+
+:::DEV:::
+cd ~/dev/auto-crop/
+rsync -avz auto-crop.yml 107.170.244.185:~/dev/auto-crop/auto-crop.yml
+rsync -avz script/auto-crop 107.170.244.185:~/dev/auto-crop/script/auto-crop
+rsync -avz target/auto-crop-0.0.1-SNAPSHOT.jar 107.170.244.185:~/dev/auto-crop/target/auto-crop-0.0.1-SNAPSHOT.jar
