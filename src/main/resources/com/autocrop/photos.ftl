@@ -7,7 +7,7 @@
     <script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
   </head>
 	<body>
-    <div class="container lead">
+    <div class="container">
       <h2>Your autocropped photos</h2>
       <p>Save these images to your computer because they will only remain on the server for a few minutes. Click on the images to see it in full size.</p>
       <#assign numRows=(numPhotos/3)?ceiling>
@@ -24,6 +24,19 @@
           </#list>
         </div>
       </#list>
+      <div class="row col-md-12">
+        <div class="center">
+          <a href="/">Crop more photos</a>
+        </div>
+      </div>
+      <div class="row col-md-12">
+        <hr/>
+      </div>
+      <div class="row col-md-12">
+        <div class="center">
+          <p>Feel free to email me with any feedback, questions, or comments. <a href="mailto:feedback@crop-photos.com">feedback@crop-photos.com</a></p>
+        </div>
+      </div>
     </div>
     <script>
       (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){

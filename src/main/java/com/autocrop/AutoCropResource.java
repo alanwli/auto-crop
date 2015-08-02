@@ -133,7 +133,8 @@ public class AutoCropResource {
       java.nio.file.Path outputPath = FileSystems.getDefault().getPath(pathStr, uploadFileName);
       Files.copy(uploadInputStream, outputPath);
 
-      ProcessBuilder pb = new ProcessBuilder("/home/alan/dev/auto-crop/script/auto-crop", "-d", "50", uploadFileName, "blah.jpg");
+      ProcessBuilder pb = new ProcessBuilder("/home/alan/dev/auto-crop/script/auto-crop", "-d", "50", "-b", "white",
+                                             uploadFileName, "blah.jpg");
       pb.directory(FileSystems.getDefault().getPath(pathStr).toFile());
       Process process = pb.start();
       int exitCode = process.waitFor();
@@ -143,6 +144,15 @@ public class AutoCropResource {
       br.close();
       if (exitCode == 0) {
         int numCropped = Integer.parseInt(output);
+
+        // don't return success if we don't have any cropped photos
+        if (numCropped <= 0) {
+          _removalListener.addPendingRemoval(requestId);
+          String json = String.format("{\"code\": %d, \"message\": \"%s\"}",
+              Status.BAD_REQUEST.getStatusCode(), "sorry, could not automatically crop this file");
+          return Response.status(Status.BAD_REQUEST).entity(json).build();
+        }
+
         String json = String.format("{\"requestId\": \"%s\"}", requestId);
         // add to book keeping
         _liveRequests.put(requestId, numCropped);
