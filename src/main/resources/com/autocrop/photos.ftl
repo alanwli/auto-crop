@@ -10,6 +10,22 @@
     <div class="container">
       <h2>Your autocropped photos</h2>
       <p>Save these images to your computer because they will only remain on the server for a few minutes. Click on the images to see it in full size.</p>
+      <div class="row">
+        <div class="col-md-4"></div>
+        <div class="col-md-4" class="thumbnail">
+          <script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+          <!-- crop-photos -->
+          <ins class="adsbygoogle"
+               style="display:block"
+               data-ad-client="ca-pub-8350070372151679"
+               data-ad-slot="9242079576"
+               data-ad-format="auto"></ins>
+          <script>
+          (adsbygoogle = window.adsbygoogle || []).push({});
+          </script>
+        </div>
+        <div class="col-md-4"></div>
+      </div>
       <#assign numRows=(numPhotos/3)?ceiling>
       <#list 0 ..< numRows as i>
         <div class="row">
